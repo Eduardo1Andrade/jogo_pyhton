@@ -4,13 +4,14 @@ player_health = 0
 inventory = []
 current_location = ""
 
-#vai logo
+# vai logo
 
 # Mapa do jogo
 locations = {
     "Clareira Tranquila": {
         "description": "Você está em uma clareira ensolarada. Há um caminho para o Leste.",
         "east": "Caminho da Floresta",
+        "west": "Pântano Misterioso",
         "items": ["poção pequena"]
     },
     "Caminho da Floresta": {
@@ -26,9 +27,10 @@ locations = {
     "Pântano Misterioso": {
         "description": "Um pântano denso e perigoso. Você sente um arrepio. Há um caminho para o Leste.",
         "east": "Clareira Tranquila",
-        "challenge": True # Novo desafio
+        "challenge": True  # Novo desafio
     }
 }
+
 
 def display_status():
     print("\n--- Status do Jogador ---")
@@ -36,6 +38,7 @@ def display_status():
     print(f"Vida: {player_health}")
     print(f"Inventário: {", ".join(inventory) if inventory else "Vazio"}")
     print("------------------------")
+
 
 def main_game_loop():
     global player_name, player_health, current_location, inventory
@@ -61,7 +64,8 @@ def main_game_loop():
 
         # Itens no local
         if "items" in locations[current_location] and locations[current_location]["items"]:
-            print(f"Itens neste local: {", ".join(locations[current_location]["items"])}")
+            print(
+                f"Itens neste local: {", ".join(locations[current_location]["items"])}")
 
         # Desafio no local
         if "challenge" in locations[current_location] and locations[current_location]["challenge"] == True:
@@ -70,37 +74,38 @@ def main_game_loop():
             print(f"Você perdeu 30 de vida. Vida atual: {player_health}")
             locations[current_location]["challenge"] = False
 
-        action = input("O que você quer fazer? (andar [direção], pegar [item], usar [item], sair) ").lower().strip()
+        action = input(
+            "O que você quer fazer?\n1 - Andar\n2 - Pegar item\n3 - Usar item\n4 - Sair\nEscolha: ").strip()
 
-        if action.startswith("andar "):
-            parts = action.split(" ")
-            if len(parts) > 1:
-                direction_input = parts[1]
-                
-                if direction_input == "norte" and "north" in locations[current_location]:
-                    current_location = locations[current_location]["north"]
-                elif direction_input == "sul" and "south" in locations[current_location]:
-                    current_location = locations[current_location]["south"]
-                elif direction_input == "leste" and "east" in locations[current_location]:
-                    current_location = locations[current_location]["east"]
-                elif direction_input == "oeste" and "west" in locations[current_location]:
-                    current_location = locations[current_location]["west"]
-                else:
-                    print("Você não pode ir nessa direção.")
+        if action == "1":
+            direction_input = input(
+                "Digite a direção (norte, sul, leste, oeste): ").lower().strip()
+
+            if direction_input == "norte" and "north" in locations[current_location]:
+                current_location = locations[current_location]["north"]
+            elif direction_input == "sul" and "south" in locations[current_location]:
+                current_location = locations[current_location]["south"]
+            elif direction_input == "leste" and "east" in locations[current_location]:
+                current_location = locations[current_location]["east"]
+            elif direction_input == "oeste" and "west" in locations[current_location]:
+                current_location = locations[current_location]["west"]
             else:
-                print("Por favor, especifique uma direção para andar.")
+                print("Você não pode ir nessa direção.")
 
-        elif action.startswith("pegar "):
-            item_to_pick = action.split(" ")[1]
-            if "items" in locations[current_location] and item_to_pick in locations[current_location]["items"]:
+        elif action == "2":
+            if "items" in locations[current_location] and locations[current_location]["items"]:
+                # pega o primeiro item
+                item_to_pick = locations[current_location]["items"][0]
                 inventory.append(item_to_pick)
                 locations[current_location]["items"].remove(item_to_pick)
+
                 print(f"Você pegou o {item_to_pick}.")
             else:
-                print("Este item não está aqui.")
+                print("Não há itens para pegar aqui.")
 
-        elif action.startswith("usar "):
-            item_to_use = action.split(" ")[1]
+        elif action == "3":
+            item_to_use = input("Qual item deseja usar? ").lower().strip()
+
             if item_to_use in inventory:
                 if item_to_use == "poção pequena":
                     player_health += 20
@@ -114,7 +119,7 @@ def main_game_loop():
             else:
                 print("Você não tem este item no seu inventário.")
 
-        elif action == "sair":
+        elif action == "4":
             game_active = False
             print("Você decidiu sair da Floresta Encantada. Até a próxima!")
 
@@ -125,7 +130,7 @@ def main_game_loop():
         if player_health <= 0:
             print("Sua vida chegou a zero. Fim de jogo!")
             game_active = False
-        
+
         if current_location == "Caverna Sombria" and "amuleto mágico" in inventory and game_active:
             print("Você encontrou o Amuleto Mágico e venceu o jogo!")
             game_active = False
