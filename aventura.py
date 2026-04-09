@@ -1,10 +1,10 @@
 # Variaveis globais do jogo - CUIDADO: Nao use variaveis globais em projetos grandes!
+import random
 player_name = ""
 player_health = 0
 inventory = []
 current_location = ""
-
-# vai logo
+monster_general_damage = 0 #dano geral dos monstros por ai
 
 # Mapa do jogo
 locations = {
@@ -12,12 +12,12 @@ locations = {
         "description": "Você está em uma clareira ensolarada. Há um caminho para o Leste.",
         "east": "Caminho da Floresta",
         "west": "Pântano Misterioso",
-        "items": ["poção pequena"]
+        "items": ["poção pequena","poção misteriosa"] 
     },
     "Caminho da Floresta": {
         "description": "Uma trilha estreita serpenteia pela floresta. Você pode ir para o Oeste ou Norte.",
         "west": "Clareira Tranquila",
-        "north": "Caverna Sombria"
+        "north": "Caverna Sombria",
     },
     "Caverna Sombria": {
         "description": "Uma caverna escura e úmida. Há um brilho fraco no fundo. Você pode voltar para o Sul.",
@@ -27,11 +27,25 @@ locations = {
     "Pântano Misterioso": {
         "description": "Um pântano denso e perigoso. Você sente um arrepio. Há um caminho para o Leste.",
         "east": "Clareira Tranquila",
+        "south" : "Vila Ninja",
         "challenge": True  # Novo desafio
+    },
+    "Vila Ninja": {
+        "description" : "Uma remota e escondida Vila de ninjas,Há um caminho para leste",
+        "east": "Mina Abandonada",
+        "north" : "Pântano Misterioso",
+        "items" : ["poção_pequena"]
+    },
+    "Mina Abandonada" : {
+        "description" : "Uma estranha mina abandonada a anos ,Há uma saida ao oeste",
+        "east": "Caminho da Floresta",
+        "west" : "Vila Ninja",
+        "items" : ["poção_pequena","item misterioso"],
+        "challenge": True
     }
 }
 
-
+print(type(locations))
 def display_status():
     print("\n--- Status do Jogador ---")
     print(f"Nome: {player_name}")
@@ -41,7 +55,7 @@ def display_status():
 
 
 def main_game_loop():
-    global player_name, player_health, current_location, inventory
+    global player_name, player_health, current_location, inventory , monster_general_damage
 
     # Inicializacao do jogo
     player_name = input("Qual o seu nome, aventureiro? ")
@@ -68,10 +82,23 @@ def main_game_loop():
                 f"Itens neste local: {", ".join(locations[current_location]["items"])}")
 
         # Desafio no local
-        if "challenge" in locations[current_location] and locations[current_location]["challenge"] == True:
-            print("Um monstro do pântano te ataca!")
-            player_health = player_health - 30
-            print(f"Você perdeu 30 de vida. Vida atual: {player_health}")
+        if "challenge" in locations[current_location] and locations[current_location]["challenge"] == True: #atualizei o sistema de luta
+            monster_general_damage = random.randint(20,50) # gera um dano aleatorio para o inimigo do local do jogo
+            print("Um monstro impede seu caminho!")
+            action_combat = input("o que deseja fazer?\n enfrentar o monstro - 1\n Tentar Fugir - 2 \n ação:")
+            if action_combat == "1":
+                player_health = player_health - monster_general_damage
+                print(f"Você lutou bravamente, mas perdeu {monster_general_damage} pontos de vida. Vida atual: {player_health}")
+            elif action_combat == "2":
+                roleta_dinamica = random.randint(1,2) # calcula em 50% de chance se o jogador consegue fugir
+                if roleta_dinamica == 1:
+                    print(f"Você consegiu fugir ileso")
+                else:
+                    player_health = player_health - int(monster_general_damage * 1.2) 
+                    print(f"o monstro de alcançou e você levou {int(monster_general_damage * 1.2)} pontos de dano\nVida atual:{player_health}")
+            else:
+                print(f"comando invalido")
+                continue
             locations[current_location]["challenge"] = False
 
         action = input(
@@ -111,6 +138,14 @@ def main_game_loop():
                     player_health += 20
                     inventory.remove(item_to_use)
                     print("Você usou a poção e recuperou 20 de vida.")
+                elif item_to_use == "poção misteriosa": # poção com chance de ganhar ou perder vida
+                    roleta_dinamica = random.randint(1,2)
+                    if roleta_dinamica == 1: 
+                        player_health += 50
+                        print("Parabéns a poção era de cura e você ganhou 50 pontos de vida")
+                    else:
+                        player_health -= 20
+                        print("a Poção era de veneno e você perdeu 20 pontos de vida")
                 elif item_to_use == "amuleto mágico":
                     print("Você usou o Amuleto Mágico! PARABÉNS, você venceu o jogo!")
                     game_active = False
